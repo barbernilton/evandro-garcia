@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - EVANDRO GARCIA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div id="loading-overlay" style="display: none;">
+        <div class="loading-box">
+            <div class="loading-spinner"></div>
+            <p id="loading-message">A processar...</p>
+        </div>
+    </div>
+
+    <div id="login-overlay" style="display: none;">
+        <div class="login-box">
+            <h2>Acesso Restrito</h2>
+            <p>Digite a senha de administrador para acessar.</p>
+            <form id="login-form">
+                <input type="password" id="admin-password" placeholder="Senha do Admin" required>
+                <button type="submit" id="login-btn">Entrar</button>
+            </form>
+            <p id="login-error" style="color: #ff4444; display: none;"></p>
+        </div>
+    </div>
+
+    <div class="admin-container" id="admin-content" style="display: none;">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <button class="menu-toggle-btn" id="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>EG Admin</h1>
+            <a href="/" class="home-btn-mobile"><i class="fas fa-home"></i></a>
+        </div>
+        
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        
+        <aside class="sidebar" id="admin-sidebar">
+            <div class="sidebar-header">
+                <h2>EG Admin</h2>
+                <button class="sidebar-close-btn" id="sidebar-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active" data-tab="dashboard"><i class="fas fa-chart-line"></i> Dashboard</li>
+                <li data-tab="expenses"><i class="fas fa-wallet"></i> Gastos</li>
+                <li data-tab="services"><i class="fas fa-cut"></i> Serviços</li>
+                <li data-tab="barbers"><i class="fas fa-users"></i> Barbeiros</li>
+                <li data-tab="calendar-view"><i class="fas fa-calendar"></i> Agenda</li>
+                <li data-tab="bookings"><i class="fas fa-calendar-alt"></i> Agendamentos</li>
+                <li data-tab="recurring"><i class="fas fa-sync-alt"></i> Recorrentes</li>
+                <li data-tab="customers"><i class="fas fa-address-book"></i> Clientes</li>
+                <li data-tab="subscriptions"><i class="fas fa-star"></i> Assinaturas</li>
+                <li data-tab="gallery"><i class="fas fa-images"></i> Galeria</li>
+                <li data-tab="radio"><i class="fas fa-music"></i> Rádio</li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="/" class="home-btn" data-testid="link-home"><i class="fas fa-home"></i> Página Inicial</a>
+                <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <section id="dashboard" class="tab-content active">
+                <header>
+                    <h1>Visão Geral Financeira</h1>
+                    <button id="generate-pdf-btn" class="action-btn"><i class="fas fa-file-pdf"></i> Relatório Mensal</button>
+                </header>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon income"><i class="fas fa-arrow-up"></i></div>
+                        <div class="stat-info">
+                            <h3>Faturamento</h3>
+                            <p class="stat-value" id="total-income">€ 0,00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon expense"><i class="fas fa-arrow-down"></i></div>
+                        <div class="stat-info">
+                            <h3>Gastos</h3>
+                            <p class="stat-value" id="total-expenses">€ 0,00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon profit"><i class="fas fa-coins"></i></div>
+                        <div class="stat-info">
+                            <h3>Lucro Líquido</h3>
+                            <p class="stat-value" id="net-profit">€ 0,00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bookings"><i class="fas fa-calendar-check"></i></div>
+                        <div class="stat-info">
+                            <h3>Agendamentos</h3>
+                            <p class="stat-value" id="total-bookings-count">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>Rendimento Anual</h3>
+                    <canvas id="annual-chart"></canvas>
+                </div>
+            </section>
+
+            <section id="expenses" class="tab-content">
+                <header>
+                    <h1>Gestão de Gastos</h1>
+                    <button class="action-btn" onclick="$('#expense-form').slideToggle()">Adicionar Gasto</button>
+                </header>
+
+                <div id="expense-form" class="admin-form" style="display: none;">
+                    <form id="add-expense-form">
+                        <input type="text" name="description" placeholder="Descrição" required>
+                        <input type="number" name="value" step="0.01" placeholder="Valor (€)" required>
+                        <input type="date" name="date" required>
+                        <select name="category" required>
+                            <option value="Produtos">Produtos</option>
+                            <option value="Aluguel">Aluguel</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Despesas">Despesas</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                        <button type="submit">Salvar</button>
+                    </form>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Valor</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenses-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="services" class="tab-content">
+                <header>
+                    <h1>Serviços</h1>
+                    <button class="action-btn" onclick="$('#service-form').slideToggle()">Adicionar Serviço</button>
+                </header>
+
+                <div id="service-form" class="admin-form" style="display: none;">
+                    <form id="add-service-form">
+                        <input type="text" name="name" placeholder="Nome do Serviço" required>
+                        <input type="number" name="price" step="0.01" placeholder="Preço (€)" required>
+                        <input type="text" name="duration" placeholder="Duração (ex: 45 min)" required>
+                        <button type="submit">Salvar</button>
+                    </form>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Preço</th>
+                            <th>Duração</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="services-table-body"></tbody>
+                </table>
+            </section>
+
+            <section id="barbers" class="tab-content">
+                <header>
+                    <h1>Barbeiros</h1>
+                    <button class="action-btn" onclick="$('#barber-form').slideToggle()">Adicionar Barbeiro</button>
+                </header>
+
+                <div id="barber-form" class="admin-form" style="display: none;">
+                    <form id="add-barber-form" enctype="multipart/form-data">
+                        <input type="text" name="name" placeholder="Nome" required>
+                        <input type="email" name="email" placeholder="Email do barbeiro (para notificações)">
+                        <input type="text" name="specialty" placeholder="Especialidade" required>
+                        <input type="text" name="experience" placeholder="Experiência" required>
+                        <div class="file-upload-wrapper">
+                            <label for="add-barber-photo" class="file-upload-label">
+                                <i class="fas fa-camera"></i>
+                                <span>Selecionar foto</span>
+                            </label>
+                            <input type="file" id="add-barber-photo" name="photo" accept="image/*">
+                            <span class="file-name" id="add-barber-file-name"></span>
+                        </div>
+                        <select name="storeId" required>
+                            <option value="1">Loja 1</option>
+                            <option value="2">Loja 2</option>
+                        </select>
+                        <select name="calendarColor">
+                            <option value="1">Lavanda</option>
+                            <option value="2">Verde Salvia</option>
+                            <option value="3">Uva</option>
+                            <option value="4">Flamingo</option>
+                            <option value="5" selected>Banana</option>
+                            <option value="6">Tangerina</option>
+                            <option value="7">Pavao</option>
+                            <option value="8">Grafite</option>
+                            <option value="9">Mirtilo</option>
+                            <option value="10">Manjericao</option>
+                            <option value="11">Tomate</option>
+                        </select>
+                        <button type="submit">Salvar</button>
+                    </form>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Especialidade</th>
+                            <th>Clientes (Mês)</th>
+                            <th>Loja</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="barbers-table-body"></tbody>
+                </table>
+            </section>
+
+            <section id="calendar-view" class="tab-content">
+                <header>
+                    <h1><i class="fas fa-calendar"></i> Agenda</h1>
+                    <div class="header-buttons">
+                        <button class="action-btn" onclick="openCreateBookingModal()"><i class="fas fa-plus"></i> Novo Agendamento</button>
+                        <button class="action-btn danger" onclick="openDeleteByNameModal()"><i class="fas fa-user-times"></i> Apagar por Nome</button>
+                    </div>
+                </header>
+                <div class="calendar-container">
+                    <div class="calendar-controls">
+                        <div class="calendar-nav">
+                            <button class="nav-btn" onclick="calendarPrev()"><i class="fas fa-chevron-left"></i></button>
+                            <button class="nav-btn today-btn" onclick="calendarToday()">Hoje</button>
+                            <button class="nav-btn" onclick="calendarNext()"><i class="fas fa-chevron-right"></i></button>
+                            <h2 id="calendar-title" class="calendar-title"></h2>
+                        </div>
+                        <div class="calendar-actions">
+                            <select id="calendar-barber-filter" onchange="renderCalendar()">
+                                <option value="">Todos os Barbeiros</option>
+                            </select>
+                            <div class="view-toggle">
+                                <button class="view-btn active" data-view="month" onclick="setCalendarView('month')">Mês</button>
+                                <button class="view-btn" data-view="week" onclick="setCalendarView('week')">Semana</button>
+                                <button class="view-btn" data-view="day" onclick="setCalendarView('day')">Dia</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="month-view" class="calendar-view-panel">
+                        <div class="calendar-header">
+                            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                        </div>
+                        <div id="calendar-grid" class="calendar-grid"></div>
+                    </div>
+                    <div id="week-view" class="calendar-view-panel" style="display:none;">
+                        <div id="week-header" class="week-header"></div>
+                        <div id="week-grid" class="week-grid"></div>
+                    </div>
+                    <div id="day-view" class="calendar-view-panel" style="display:none;">
+                        <div id="day-timeline" class="day-timeline"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="bookings" class="tab-content">
+                <header>
+                    <h1>Agendamentos</h1>
+                    <div class="header-buttons">
+                        <button class="action-btn" onclick="openCreateBookingModal()"><i class="fas fa-plus"></i> Novo Agendamento</button>
+                        <button class="action-btn danger" onclick="deleteAllBookings()"><i class="fas fa-trash"></i> Apagar Todos</button>
+                    </div>
+                </header>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Cliente</th>
+                            <th>Serviço</th>
+                            <th>Barbeiro</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookings-table-body"></tbody>
+                </table>
+            </section>
+
+            <section id="recurring" class="tab-content">
+                <header>
+                    <h1>Agendamentos Recorrentes</h1>
+                    <div class="header-buttons">
+                        <button class="action-btn" onclick="openRecurringModal()"><i class="fas fa-plus"></i> Novo Agendamento Recorrente</button>
+                        <button class="action-btn danger" onclick="deleteAllRecurring()"><i class="fas fa-trash"></i> Apagar Todos</button>
+                    </div>
+                </header>
+                
+                <div class="recurring-stats">
+                    <div class="stat-mini"><i class="fas fa-sync"></i> <span id="recurring-active-count">0</span> Séries Ativas</div>
+                    <div class="stat-mini"><i class="fas fa-calendar-check"></i> <span id="recurring-total-bookings">0</span> Eventos Futuros</div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Barbeiro</th>
+                            <th>Frequência</th>
+                            <th>Horário</th>
+                            <th>Próximo</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recurring-table-body"></tbody>
+                </table>
+            </section>
+
+            <section id="customers" class="tab-content">
+                <header>
+                    <h1>Clientes</h1>
+                    <button class="action-btn" onclick="$('#customer-form').slideToggle()"><i class="fas fa-plus"></i> Adicionar Cliente</button>
+                </header>
+
+                <div id="customer-form" class="admin-form" style="display: none;">
+                    <form id="add-customer-form">
+                        <input type="text" name="name" placeholder="Nome do cliente" required>
+                        <input type="tel" name="phone" placeholder="Telefone" required>
+                        <input type="email" name="email" placeholder="E-mail (opcional)">
+                        <button type="submit">Salvar</button>
+                    </form>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Telefone</th>
+                            <th>E-mail</th>
+                            <th>Origem</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customers-table-body"></tbody>
+                </table>
+            </section>
+
+            <section id="subscriptions" class="tab-content">
+                <header>
+                    <h1>Assinaturas</h1>
+                </header>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Telefone</th>
+                            <th>Email</th>
+                            <th>Plano</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subscriptions-table-body"></tbody>
+                </table>
+            </section>
+
+            <section id="gallery" class="tab-content">
+                <header>
+                    <h1>Galeria do Carousel</h1>
+                    <button class="action-btn" onclick="$('#gallery-form').slideToggle()"><i class="fas fa-plus"></i> Adicionar Mídia</button>
+                </header>
+
+                <div id="gallery-form" class="admin-form" style="display: none;">
+                    <form id="add-gallery-form" enctype="multipart/form-data">
+                        <div class="file-upload-wrapper">
+                            <label for="gallery-file" class="file-upload-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Clique para selecionar foto ou vídeo</span>
+                            </label>
+                            <input type="file" id="gallery-file" name="file" accept="image/*,video/*" required>
+                            <span class="file-name" id="gallery-file-name"></span>
+                        </div>
+                        <input type="text" name="title" placeholder="Título (opcional)">
+                        <input type="text" name="description" placeholder="Descrição (opcional)">
+                        <button type="submit">Salvar</button>
+                    </form>
+                </div>
+
+                <div id="gallery-grid" class="gallery-admin-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <section id="radio" class="tab-content">
+                <header>
+                    <h1>Rádio do Site</h1>
+                    <button class="action-btn" onclick="$('#radio-form').slideToggle()"><i class="fas fa-plus"></i> Adicionar Música</button>
+                </header>
+
+                <div id="radio-form" class="admin-form" style="display: none;">
+                    <form id="add-radio-form" enctype="multipart/form-data">
+                        <div class="file-upload-wrapper">
+                            <label for="radio-file" class="file-upload-label">
+                                <i class="fas fa-music"></i>
+                                <span>Selecionar arquivo de música (MP3, WAV, etc)</span>
+                            </label>
+                            <input type="file" id="radio-file" name="file" accept="audio/*" required>
+                            <span class="file-name" id="radio-file-name"></span>
+                        </div>
+                        <input type="text" name="title" placeholder="Nome da música" required>
+                        <input type="text" name="artist" placeholder="Artista (opcional)">
+                        <button type="submit">Salvar</button>
+                    </form>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Música</th>
+                            <th>Artista</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="radio-table-body"></tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <!-- Create Booking Modal -->
+    <div id="create-booking-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Novo Agendamento</h2>
+                <button class="modal-close" onclick="closeModal('create-booking-modal')">&times;</button>
+            </div>
+            <form id="create-booking-form">
+                <div class="form-group">
+                    <label>Nome do Cliente</label>
+                    <input type="text" name="customerName" required placeholder="Nome completo">
+                </div>
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="text" name="customerPhone" placeholder="Telefone do cliente">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="customerEmail" placeholder="Email do cliente">
+                </div>
+                <div class="form-group">
+                    <label>Serviço</label>
+                    <select name="serviceName" id="booking-service-select" required>
+                        <option value="">Selecione um serviço</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Barbeiro</label>
+                    <select name="barberName" id="booking-barber-select" required>
+                        <option value="">Selecione um barbeiro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Data</label>
+                    <input type="date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label>Hora</label>
+                    <select name="time" required>
+                        <option value="">Selecione um horário</option>
+                        <option value="09:00">09:00</option>
+                        <option value="09:30">09:30</option>
+                        <option value="10:00">10:00</option>
+                        <option value="10:30">10:30</option>
+                        <option value="11:00">11:00</option>
+                        <option value="11:30">11:30</option>
+                        <option value="12:00">12:00</option>
+                        <option value="12:30">12:30</option>
+                        <option value="14:00">14:00</option>
+                        <option value="14:30">14:30</option>
+                        <option value="15:00">15:00</option>
+                        <option value="15:30">15:30</option>
+                        <option value="16:00">16:00</option>
+                        <option value="16:30">16:30</option>
+                        <option value="17:00">17:00</option>
+                        <option value="17:30">17:30</option>
+                        <option value="18:00">18:00</option>
+                        <option value="18:30">18:30</option>
+                        <option value="19:00">19:00</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Valor (€)</label>
+                    <input type="number" name="totalPrice" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('create-booking-modal')">Cancelar</button>
+                    <button type="submit" class="btn-save">Criar Agendamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Expense Modal -->
+    <div id="edit-expense-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Gasto</h2>
+                <button class="modal-close" onclick="closeModal('edit-expense-modal')">&times;</button>
+            </div>
+            <form id="edit-expense-form">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <input type="text" name="description" required>
+                </div>
+                <div class="form-group">
+                    <label>Valor (€)</label>
+                    <input type="number" name="value" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Data</label>
+                    <input type="date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select name="category" required>
+                        <option value="Produtos">Produtos</option>
+                        <option value="Aluguel">Aluguel</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Despesas">Despesas</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('edit-expense-modal')">Cancelar</button>
+                    <button type="submit" class="btn-save">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Service Modal -->
+    <div id="edit-service-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Serviço</h2>
+                <button class="modal-close" onclick="closeModal('edit-service-modal')">&times;</button>
+            </div>
+            <form id="edit-service-form">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Nome do Serviço</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Preço (€)</label>
+                    <input type="number" name="price" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Duração</label>
+                    <input type="text" name="duration" placeholder="Ex: 30 min">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('edit-service-modal')">Cancelar</button>
+                    <button type="submit" class="btn-save">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Barber Modal -->
+    <div id="edit-barber-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Barbeiro</h2>
+                <button class="modal-close" onclick="closeModal('edit-barber-modal')">&times;</button>
+            </div>
+            <form id="edit-barber-form" enctype="multipart/form-data">
+                <input type="hidden" name="id">
+                <input type="hidden" name="existingPhoto">
+                <div class="form-group">
+                    <label>Nome</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email (para notificações)</label>
+                    <input type="email" name="email" placeholder="email@exemplo.com">
+                </div>
+                <div class="form-group">
+                    <label>Especialidade</label>
+                    <input type="text" name="specialty" required>
+                </div>
+                <div class="form-group">
+                    <label>Experiência</label>
+                    <input type="text" name="experience" required>
+                </div>
+                <div class="form-group">
+                    <label>Foto</label>
+                    <div class="photo-preview-wrapper">
+                        <img id="edit-barber-preview" src="" alt="Preview" style="display: none;">
+                    </div>
+                    <div class="file-upload-wrapper">
+                        <label for="edit-barber-photo" class="file-upload-label">
+                            <i class="fas fa-camera"></i>
+                            <span>Alterar foto</span>
+                        </label>
+                        <input type="file" id="edit-barber-photo" name="photo" accept="image/*">
+                        <span class="file-name" id="edit-barber-file-name"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Loja</label>
+                    <select name="storeId" required>
+                        <option value="1">Loja 1</option>
+                        <option value="2">Loja 2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cor no Calendario</label>
+                    <select name="calendarColor">
+                        <option value="1">Lavanda</option>
+                        <option value="2">Verde Salvia</option>
+                        <option value="3">Uva</option>
+                        <option value="4">Flamingo</option>
+                        <option value="5">Banana</option>
+                        <option value="6">Tangerina</option>
+                        <option value="7">Pavao</option>
+                        <option value="8">Grafite</option>
+                        <option value="9">Mirtilo</option>
+                        <option value="10">Manjericao</option>
+                        <option value="11">Tomate</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('edit-barber-modal')">Cancelar</button>
+                    <button type="submit" class="btn-save">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Radio Modal -->
+    <div id="edit-radio-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Música</h2>
+                <button class="modal-close" onclick="closeModal('edit-radio-modal')">&times;</button>
+            </div>
+            <form id="edit-radio-form">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Nome da Música</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Artista</label>
+                    <input type="text" name="artist">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('edit-radio-modal')">Cancelar</button>
+                    <button type="submit" class="btn-save">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Recurring Booking Modal -->
+    <div id="recurring-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2>Novo Agendamento Recorrente</h2>
+                <button class="modal-close" onclick="closeModal('recurring-modal')">&times;</button>
+            </div>
+            <form id="recurring-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cliente *</label>
+                        <div class="customer-search-wrapper">
+                            <input type="text" id="recurring-customer-search" placeholder="Buscar cliente existente..." autocomplete="off">
+                            <div id="customer-search-results" class="search-results-dropdown"></div>
+                        </div>
+                        <input type="hidden" id="recurring-customer-id">
+                    </div>
+                </div>
+                
+                <div class="form-row three-cols">
+                    <div class="form-group">
+                        <label>Nome *</label>
+                        <input type="text" id="recurring-customer-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone *</label>
+                        <input type="tel" id="recurring-customer-phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <input type="email" id="recurring-customer-email">
+                    </div>
+                </div>
+                
+                <div id="duplicate-customer-alert" class="alert alert-warning" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Cliente já existe. <a href="#" onclick="useExistingCustomer()">Usar dados existentes</a></span>
+                </div>
+
+                <hr>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Barbeiro *</label>
+                        <select id="recurring-barber" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Serviço *</label>
+                        <select id="recurring-service" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Frequência *</label>
+                        <select id="recurring-frequency" required onchange="updateRecurrenceOptions()">
+                            <option value="weekly">Semanal</option>
+                            <option value="biweekly">Quinzenal</option>
+                            <option value="monthly">Mensal</option>
+                            <option value="daily">Diário</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="interval-group" style="display: none;">
+                        <label>A cada</label>
+                        <div class="interval-input">
+                            <input type="number" id="recurring-interval" value="1" min="1" max="12">
+                            <select id="recurring-interval-type">
+                                <option value="days">dias</option>
+                                <option value="weeks">semanas</option>
+                                <option value="months">meses</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" id="days-of-week-group">
+                    <label>Dias da Semana</label>
+                    <div class="days-checkboxes">
+                        <label><input type="checkbox" name="weekday" value="1"> Seg</label>
+                        <label><input type="checkbox" name="weekday" value="2"> Ter</label>
+                        <label><input type="checkbox" name="weekday" value="3"> Qua</label>
+                        <label><input type="checkbox" name="weekday" value="4"> Qui</label>
+                        <label><input type="checkbox" name="weekday" value="5"> Sex</label>
+                        <label><input type="checkbox" name="weekday" value="6"> Sáb</label>
+                        <label><input type="checkbox" name="weekday" value="0"> Dom</label>
+                    </div>
+                </div>
+
+                <div class="form-row three-cols">
+                    <div class="form-group">
+                        <label>Data Início *</label>
+                        <input type="date" id="recurring-start-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Horário *</label>
+                        <input type="time" id="recurring-time" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Duração do Evento</label>
+                        <select id="recurring-end-type" onchange="updateEndTypeFields()">
+                            <option value="occurrences">Por número de eventos</option>
+                            <option value="end-date">Até data final</option>
+                            <option value="no-end">Sem data final (máx. 52 semanas)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row" id="end-fields">
+                    <div class="form-group" id="occurrences-group">
+                        <label>Número de Eventos</label>
+                        <input type="number" id="recurring-occurrences" value="10" min="1" max="100">
+                    </div>
+                    <div class="form-group" id="end-date-group" style="display: none;">
+                        <label>Data Final</label>
+                        <input type="date" id="recurring-end-date">
+                    </div>
+                </div>
+
+                <button type="button" class="btn-preview" onclick="previewRecurrence()">
+                    <i class="fas fa-eye"></i> Pré-visualizar Datas
+                </button>
+
+                <div id="recurrence-preview" class="recurrence-preview" style="display: none;">
+                    <h4><i class="fas fa-calendar"></i> Datas a serem criadas (<span id="preview-count">0</span>):</h4>
+                    <div id="preview-dates-list" class="preview-dates-list"></div>
+                    <div id="preview-conflicts" class="preview-conflicts" style="display: none;">
+                        <h5><i class="fas fa-exclamation-circle"></i> Conflitos encontrados:</h5>
+                        <div id="conflicts-list"></div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('recurring-modal')">Cancelar</button>
+                    <button type="submit" class="btn-save" id="recurring-submit-btn">
+                        <i class="fas fa-check"></i> Criar Agendamentos
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Recurrence Details Modal -->
+    <div id="recurrence-details-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2>Detalhes da Recorrência</h2>
+                <button class="modal-close" onclick="closeModal('recurrence-details-modal')">&times;</button>
+            </div>
+            <div id="recurrence-details-content">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Customer Modal -->
+    <div id="edit-customer-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Cliente</h2>
+                <button class="modal-close" onclick="closeModal('edit-customer-modal')">&times;</button>
+            </div>
+            <form id="edit-customer-form">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Nome</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="tel" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" name="email">
+                </div>
+                <div class="form-group">
+                    <label>Notas</label>
+                    <textarea name="notes" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('edit-customer-modal')">Cancelar</button>
+                    <button type="submit" class="btn-save">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

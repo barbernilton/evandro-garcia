@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EVANDRO GARCIA - A barbearia premium onde tradição e modernidade se encontram para criar a experiência definitiva em cuidados masculinos">
+    <meta name="keywords" content="barbearia, corte masculino, barba, Faro, premium, evandro garcia">
+    <title>EVANDRO GARCIA - Beyond Excellence | A Arte do Corte Masculino</title>
+
+    <!-- Favicon básico -->
+    <link rel="icon" type="image/png" href="assets/images/LOGO.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="assets/images/LOGO.png" sizes="16x16">
+
+    <!-- Apple Touch Icon (iPhone, iPad, Android) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/LOGO.png">
+
+    <!-- Android Chrome -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/LOGO.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/LOGO.png">
+
+    <!-- Windows Metro -->
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="msapplication-TileImage" content="assets/images/LOGO.png">
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="assets/images/LOGO.png">
+
+    <!-- Tema do navegador -->
+    <meta name="theme-color" content="#000000">
+     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Montserrat:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="cursor-glow"></div>
+    <canvas id="particles-canvas"></canvas>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/images/LOGO.png" alt="EVANDRO GARCIA Logo">
+            </div>
+            
+            <!-- Player de Música Integrado na Navbar -->
+            <div class="music-player-integrated">
+                <!-- Disco Giratório -->
+                <div class="music-disc-navbar" id="music-disc-navbar">
+                    <div class="disc-inner-navbar">
+                        <div class="disc-center-navbar">
+                            <i class="fas fa-music"></i>
+                        </div>
+                        <div class="disc-ring-navbar disc-ring-1-navbar"></div>
+                        <div class="disc-ring-navbar disc-ring-2-navbar"></div>
+                        <div class="disc-ring-navbar disc-ring-3-navbar"></div>
+                    </div>
+                </div>
+                
+                <!-- Informações da Música -->
+                <div class="music-info-navbar">
+                    <div class="music-title-navbar" id="music-title-navbar">Carregando...</div>
+                    
+                    <!-- Barra de Progresso -->
+                    <div class="music-progress-navbar">
+                        <div class="progress-bar-navbar" id="progress-bar-navbar">
+                            <div class="progress-fill-navbar" id="progress-fill-navbar"></div>
+                        </div>
+                        <div class="time-display-navbar">
+                            <span id="current-time-navbar">0:00</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Controles de Música -->
+                    <div class="music-controls-navbar">
+                        <button class="music-btn-navbar prev-btn-navbar" id="prev-btn-navbar" aria-label="Música anterior">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        
+                        <button class="music-btn-navbar play-btn-navbar" id="play-btn-navbar" aria-label="Reproduzir/Pausar">
+                            <i class="fas fa-play" id="play-icon-navbar"></i>
+                            <i class="fas fa-pause" id="pause-icon-navbar" style="display: none;"></i>
+                        </button>
+                        
+                        <button class="music-btn-navbar next-btn-navbar" id="next-btn-navbar" aria-label="Próxima música">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li><a href="#hero">Início</a></li>
+                <li><a href="#excelencia">Excelência</a></li>
+                <li><a href="#trabalhos">Serviços</a></li>
+                <li><a href="#agendamento" class="nav-cta">Agendar</a></li>
+                <!-- Mobile auth buttons inside menu -->
+                <li class="mobile-auth-buttons" id="mobile-auth-logged-out">
+                    <button onclick="closeMobileMenu(); openLoginModal()" class="auth-btn login-btn" data-testid="button-login-mobile">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <button onclick="closeMobileMenu(); openRegisterModal()" class="auth-btn register-btn" data-testid="button-register-mobile">
+                        <i class="fas fa-user-plus"></i> Registrar
+                    </button>
+                </li>
+                <li class="mobile-auth-buttons" id="mobile-auth-logged-in" style="display: none;">
+                    <a href="admin.html" onclick="closeMobileMenu()" class="auth-btn admin-btn" id="mobile-admin-btn" style="display: none;" data-testid="button-admin-mobile">
+                        <i class="fas fa-cog"></i> Admin
+                    </a>
+                    <button onclick="closeMobileMenu(); logout()" class="auth-btn logout-btn" data-testid="button-logout-mobile">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </li>
+            </ul>
+            <div class="nav-auth" id="nav-auth">
+                <div class="auth-logged-out" id="auth-logged-out">
+                    <button onclick="openLoginModal()" class="auth-btn login-btn" data-testid="button-login">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <button onclick="openRegisterModal()" class="auth-btn register-btn" data-testid="button-register">
+                        <i class="fas fa-user-plus"></i> Registrar
+                    </button>
+                </div>
+                <div class="auth-logged-in" id="auth-logged-in" style="display: none;">
+                    <div class="user-profile" id="user-profile">
+                        <span class="user-name" id="user-name"></span>
+                    </div>
+                    <a href="admin.html" class="auth-btn admin-btn" id="admin-panel-btn" style="display: none;" data-testid="button-admin-panel">
+                        <i class="fas fa-cog"></i> Admin
+                    </a>
+                    <button onclick="logout()" class="auth-btn logout-btn" data-testid="button-logout">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
+            </div>
+            <div class="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Áudio Element (invisível) - Colocado fora da navbar para melhor controle -->
+    <audio id="bg-music" preload="auto" loop>
+        Seu navegador não suporta o elemento de áudio.
+    </audio>
+
+    <section id="hero" class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-logo-large">
+                <img src="assets/images/LOGO.png" alt="EVANDRO GARCIA">
+            </div>
+            <h1 class="hero-title">
+                <span class="line-1">EVANDRO GARCIA</span>
+            </h1>
+            <p class="hero-subtitle typing-text">A Arte do Corte Masculino</p>
+            <p class="hero-tagline">Onde a tradição encontra a excelência</p>
+            <a href="#agendamento" class="hero-cta">
+                <span>AGENDAR HORÁRIO</span>
+                <div class="cta-shine"></div>
+            </a>
+        </div>
+        <div class="scroll-indicator">
+            <div class="mouse">
+                <div class="wheel"></div>
+            </div>
+            <p>Role para explorar</p>
+        </div>
+    </section>
+
+    <section id="excelencia" class="excelencia-section">
+        <div class="section-header">
+            <span class="section-number">01</span>
+            <h2 class="section-title">A Excelência no Corte Masculino</h2>
+            <div class="title-underline"></div>
+        </div>
+        <div class="excelencia-content">
+            <p class="excelencia-intro">Onde tradição, estilo e precisão se encontram para criar a melhor versão de você.</p>
+            
+            <div class="excelencia-grid">
+                <div class="excelencia-card">
+                    <div class="excelencia-icon">✂️</div>
+                    <h3>Na Barbearia Evandro Garcia, cada detalhe importa.</h3>
+                    <p>Oferecemos uma experiência premium — ambiente sofisticado, atendimento personalizado e resultados impecáveis.</p>
+                </div>
+                
+                <div class="excelencia-card">
+                    <div class="excelencia-icon">⭐</div>
+                    <h3>Referência em Faro</h3>
+                    <p>Descobri por que somos referência em cortes masculinos de alto nível em Faro. Qualidade que se vê e se sente.</p>
+                </div>
+                
+                <div class="excelencia-card">
+                    <div class="excelencia-icon">👑</div>
+                    <h3>Experiência Premium</h3>
+                    <p>Mais do que um corte, uma experiência única que valoriza sua imagem e autoestima.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="trabalhos" class="trabalhos-section">
+        <div class="section-header">
+            <span class="section-number">02</span>
+            <h2 class="section-title">Nossos Trabalhos</h2>
+            <div class="title-underline"></div>
+        </div>
+        <div class="gallery-carousel">
+            <div class="carousel-track" id="gallery-track">
+                <!-- Imagens e vídeos misturados -->
+                <div class="gallery-item" data-index="0">
+                    <div class="gallery-image-wrapper">
+                        <img 
+                            src="assets/cortes/corte1.jpg" 
+                            alt=""
+                            loading="lazy"
+                        >
+                        <div class="gallery-overlay">
+                            <h3></h3>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-index="1">
+                    <div class="gallery-image-wrapper">
+                        <video 
+                            src="assets/cortes/video1.mp4" 
+                            poster=""
+                            preload="metadata"
+                            loop
+                            muted
+                        ></video>
+                        <div class="gallery-overlay">
+                            <h3></h3>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-index="2">
+                    <div class="gallery-image-wrapper">
+                        <img 
+                            src="assets/cortes/corte2.jpg" 
+                            alt=""
+                            loading="lazy"
+                        >
+                        <div class="gallery-overlay">
+                            <h3></h3>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-index="3">
+                    <div class="gallery-image-wrapper">
+                        <video 
+                            src="assets/cortes/video2.mp4" 
+                            poster=""
+                            preload="metadata"
+                            loop
+                            muted
+                        ></video>
+                        <div class="gallery-overlay">
+                            <h3></h3>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-index="4">
+                    <div class="gallery-image-wrapper">
+                        <img 
+                            src="assets/cortes/corte3.jpg" 
+                            alt=""
+                            loading="lazy"
+                        >
+                        <div class="gallery-overlay">
+                            <h3></h3>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-index="5">
+                    <div class="gallery-image-wrapper">
+                        <video 
+                            src="assets/cortes/video3.mp4" 
+                            poster=""
+                            preload="metadata"
+                            loop
+                            muted
+                        ></video>
+                        <div class="gallery-overlay">
+                            <h3></h3>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-index="6">
+                    <div class="gallery-image-wrapper">
+                        <video 
+                            src="assets/cortes/video4.mp4" 
+                            poster=""
+                            preload="metadata"
+                            loop
+                            muted
+                        ></video>
+                        <div class="gallery-overlay">
+                            <h3></h3>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- Fechamento correto do carousel-track -->
+            
+            <button class="carousel-btn prev" id="prev-btn">
+                <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button class="carousel-btn next" id="next-btn">
+                <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+        </div>
+    </section>
+
+    <section id="assinatura" class="subscription-section">
+        <div class="section-header">
+            <span class="section-number">03</span>
+            <h2 class="section-title">Plano Mensal</h2>
+            <div class="title-underline"></div>
+        </div>
+        <div class="subscription-content">
+            <div class="subscription-info">
+                <h3>Seja um Assinante VIP</h3>
+                <p>Assine nosso plano mensal e tenha acesso ilimitado aos melhores serviços da barbearia com preços exclusivos.</p>
+            </div>
+            <div class="subscription-plans-grid">
+                <div class="subscription-plan-card" data-testid="card-plan-corte">
+                    <div class="plan-card-header">
+                        <i class="fas fa-cut"></i>
+                        <h4>Assinatura Mensal Corte</h4>
+                    </div>
+                    <div class="plan-card-price">
+                        <span class="price">€50,00</span>
+                        <span class="period">/mês</span>
+                    </div>
+                    <p class="plan-card-desc">Cortes ilimitados durante o mês</p>
+                    <ul class="plan-card-benefits">
+                        <li><i class="fas fa-check"></i> Cortes ilimitados (seg. a qua.)</li>
+                        <li><i class="fas fa-check"></i> Prioridade no agendamento</li>
+                        <li><i class="fas fa-check"></i> Atendimento VIP</li>
+                    </ul>
+                    <button class="plan-subscribe-btn" data-plan="corte" data-price="50.00" data-testid="button-subscribe-corte">
+                        <i class="fas fa-star"></i> Assinar
+                    </button>
+                </div>
+                <div class="subscription-plan-card featured" data-testid="card-plan-corte-barba">
+                    <div class="plan-card-badge">Mais Popular</div>
+                    <div class="plan-card-header">
+                        <i class="fas fa-cut"></i>
+                        <h4>Assinatura Mensal Corte + Barba</h4>
+                    </div>
+                    <div class="plan-card-price">
+                        <span class="price">€70,00</span>
+                        <span class="period">/mês</span>
+                    </div>
+                    <p class="plan-card-desc">Cortes e barba ilimitados</p>
+                    <ul class="plan-card-benefits">
+                        <li><i class="fas fa-check"></i> Cortes ilimitados (seg. a qua.)</li>
+                        <li><i class="fas fa-check"></i> Barba ilimitada (seg. a qua.)</li>
+                        <li><i class="fas fa-check"></i> Prioridade no agendamento</li>
+                        <li><i class="fas fa-check"></i> Atendimento VIP</li>
+                    </ul>
+                    <button class="plan-subscribe-btn" data-plan="corte_barba" data-price="70.00" data-testid="button-subscribe-corte-barba">
+                        <i class="fas fa-star"></i> Assinar
+                    </button>
+                </div>
+                <div class="subscription-plan-card" data-testid="card-plan-ualg">
+                    <div class="plan-card-header">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h4>Assinatura Mensal Corte UAlg</h4>
+                    </div>
+                    <div class="plan-card-price">
+                        <span class="price">€45,00</span>
+                        <span class="period">/mês</span>
+                    </div>
+                    <p class="plan-card-desc">Exclusivo para estudantes UAlg</p>
+                    <ul class="plan-card-benefits">
+                        <li><i class="fas fa-check"></i> Cortes ilimitados (seg. a qua.)</li>
+                        <li><i class="fas fa-check"></i> Preço especial estudante</li>
+                        <li><i class="fas fa-check"></i> Atendimento VIP</li>
+                    </ul>
+                    <button class="plan-subscribe-btn" data-plan="corte_ualg" data-price="45.00" data-testid="button-subscribe-ualg">
+                        <i class="fas fa-star"></i> Assinar
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="subscription-modal" id="subscription-modal" style="display: none;">
+            <div class="subscription-modal-content">
+                <button class="modal-close" id="modal-close-btn" data-testid="button-modal-close">&times;</button>
+                <h3 id="modal-plan-title">Assine o Plano Mensal</h3>
+                <div class="selected-plan-info" id="selected-plan-info">
+                    <span class="selected-plan-name" id="selected-plan-name"></span>
+                    <span class="selected-plan-price" id="selected-plan-price"></span>
+                </div>
+                <form id="subscription-form" data-testid="form-subscription">
+                    <input type="hidden" name="subscriptionPlan" id="subscription-plan-input">
+                    <input type="hidden" name="subscriptionPrice" id="subscription-price-input">
+                    <div class="form-group">
+                        <label for="sub-name">Nome Completo</label>
+                        <input type="text" id="sub-name" name="customerName" required placeholder="Seu nome" data-testid="input-sub-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="sub-email">E-mail</label>
+                        <input type="email" id="sub-email" name="customerEmail" required placeholder="seu@email.com" data-testid="input-sub-email">
+                    </div>
+                    <div class="form-group">
+                        <label for="sub-phone">Telefone</label>
+                        <input type="tel" id="sub-phone" name="customerPhone" required placeholder="+351 912 345 678" data-testid="input-sub-phone">
+                    </div>
+                    <button type="submit" class="subscription-submit-btn" data-testid="button-submit-subscription">
+                        <i class="fas fa-paper-plane"></i> Enviar Solicitação
+                    </button>
+                </form>
+                <p class="subscription-note">Entraremos em contato para confirmar sua assinatura.</p>
+            </div>
+        </div>
+    </section>
+    
+    <section id="agendamento" class="agendamento-section">
+        <div class="section-header">
+            <span class="section-number">04</span>
+            <h2 class="section-title">Agende Seu Horário</h2>
+            <div class="title-underline"></div>
+        </div>
+
+        <div class="booking-container">
+            <div class="booking-progress">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Serviço</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Local</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Barbeiro</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Dados</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="5">
+                    <div class="step-number">5</div>
+                    <div class="step-label">Data/Hora</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="6">
+                    <div class="step-number">6</div>
+                    <div class="step-label">Confirmação</div>
+                </div>
+            </div>
+
+            <div class="booking-form-container">
+                <div class="booking-step step-1 active">
+                    <h3>Escolha Seu Serviço</h3>
+                    <div class="service-selection-grid" id="services-selection">
+                        <!-- Serviços carregados dinamicamente do banco de dados -->
+                    </div>
+                    <button class="booking-next-btn" disabled>Continuar</button>
+                </div>
+
+                <div class="booking-step step-2">
+                    <h3>Nossa Localização</h3>
+                    <div class="store-selection-grid">
+                        <div class="store-selection-card selected" data-store="1">
+                            <div class="selection-check"></div>
+                            <h4>EVANDRO GARCIA - Centro</h4>
+                            <p class="store-address">Largo de Camões n3, 8000-140 Faro</p>
+                            <p class="store-hours">Seg-Sab: 9h às 20h</p>
+                            <p class="store-feature">📱 WhatsApp: 925 124 104</p>
+                            <p class="store-feature">🎨 Studio de Tatuagem incluso • ✨ Também fazemos tranças</p>
+                        </div>
+                    </div>
+                    <div class="booking-buttons">
+                        <button class="booking-back-btn">Voltar</button>
+                        <button class="booking-next-btn">Continuar</button>
+                    </div>
+                </div>
+
+                <div class="booking-step step-3">
+                    <h3>Escolha o Barbeiro</h3>
+                    <div class="barber-selection-grid" id="barber-selection">
+                        <!-- Barbeiros serão carregados dinamicamente conforme a loja selecionada -->
+                    </div>
+                    <div class="booking-buttons">
+                        <button class="booking-back-btn">Voltar</button>
+                        <button class="booking-next-btn" disabled>Continuar</button>
+                    </div>
+                </div>
+
+                <div class="booking-step step-4">
+                    <h3>Seus Dados</h3>
+                    <form id="customer-form">
+                        <div class="form-group">
+                            <label for="customer-name">Nome Completo</label>
+                            <input type="text" id="customer-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-email">Email</label>
+                            <input type="email" id="customer-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-phone">Telefone</label>
+                            <input type="tel" id="customer-phone" required>
+                        </div>
+                    </form>
+                    <div class="booking-buttons">
+                        <button class="booking-back-btn">Voltar</button>
+                        <button class="booking-next-btn" disabled>Continuar</button>
+                    </div>
+                </div>
+
+                <div class="booking-step step-5">
+                    <h3>Escolha Data e Horário</h3>
+                    <div class="date-time-selector">
+                        <div class="date-selector">
+                            <label>Selecione a Data</label>
+                            <input type="date" id="booking-date" required>
+                        </div>
+                        <div class="time-selector">
+                            <label>Selecione o Horário</label>
+                            <div class="time-slots" id="time-slots">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="booking-buttons">
+                        <button class="booking-back-btn">Voltar</button>
+                        <button class="booking-next-btn" disabled>Continuar</button>
+                    </div>
+                </div>
+
+                <div class="booking-step step-6">
+                    <h3>Confirmação do Agendamento</h3>
+                    <div class="booking-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">Serviço:</span>
+                            <span class="summary-value" id="summary-service"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Preço:</span>
+                            <span class="summary-value" id="summary-price"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Loja:</span>
+                            <span class="summary-value" id="summary-store"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Barbeiro:</span>
+                            <span class="summary-value" id="summary-barber"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Nome:</span>
+                            <span class="summary-value" id="summary-name"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Email:</span>
+                            <span class="summary-value" id="summary-email"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Telefone:</span>
+                            <span class="summary-value" id="summary-phone"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Data:</span>
+                            <span class="summary-value" id="summary-date"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Horário:</span>
+                            <span class="summary-value" id="summary-time"></span>
+                        </div>
+                    </div>
+                    <div class="booking-buttons">
+                        <button class="booking-back-btn">Voltar</button>
+                        <button class="booking-confirm-btn">Confirmar Agendamento</button>
+                    </div>
+                    <div class="confirmation-message" id="confirmation-message">
+                        <div class="success-icon">✓</div>
+                        <h4>Agendamento Confirmado!</h4>
+                        <p class="calendar-added" id="calendar-status"></p>
+                        <p style="margin-top: 15px; font-size: 13px; color: #aaa; background: rgba(212,165,55,0.1); border: 1px solid rgba(212,165,55,0.3); border-radius: 8px; padding: 10px 15px; text-align: center;">
+                            <i class="fas fa-envelope" style="color: #d4a537; margin-right: 5px;"></i>
+                            Enviamos um email de confirmacao. Caso nao encontre na caixa de entrada, verifique a pasta de <strong>spam</strong> ou <strong>lixo eletronico</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <img src="assets/images/LOGO.png" alt="EVANDRO GARCIA" class="footer-logo">
+                <p class="footer-tagline">Excelência em Cada Detalhe</p>
+            </div>
+            <div class="footer-section">
+                <h4>Contato</h4>
+                <a href="https://wa.me/351925124104">WhatsApp: 925 124 104</a>
+                <a href="https://maps.app.goo.gl/example">Largo de Camões n3, 8000-140 Faro</a>
+            </div>
+            <div class="footer-section">
+                <h4>Horário</h4>
+                <p>Segunda a Sábado: 9h - 20h</p>
+            </div>
+            <div class="footer-section footer-map">
+                <h4>Localização</h4>
+                <a href="https://www.google.com/maps/place/Barbearia+Evandro+Garcia/@37.021351,-7.9395224,17z/data=!3m1!4b1!4m6!3m5!1s0xd0552b86bc4b761:0xf6b61cb2717b518f!8m2!3d37.021351!4d-7.9395224!16s%2Fg%2F11gf9fynmq?entry=ttu" target="_blank" rel="noopener noreferrer" class="map-link">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3194.8!2d-7.9395224!3d37.021351!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd0552b86bc4b761%3A0xf6b61cb2717b518f!2sBarbearia%20Evandro%20Garcia!5e0!3m2!1spt-PT!2spt!4v1706638800000!5m2!1spt-PT!2spt"
+                        width="180" 
+                        height="120" 
+                        style="border:0; border-radius: 8px; pointer-events: none;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                    <span class="map-overlay">Clique para abrir no Maps</span>
+                </a>
+            </div>
+            <div class="footer-section">
+                <h4>Redes Sociais</h4>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/barbearia_evandro_garcia_1/" aria-label="Instagram">Instagram</a>
+                    <a href="https://wa.me/351925124104" aria-label="WhatsApp">WhatsApp</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 EVANDRO GARCIA BY BRAGA WORK. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="auth-modal" style="display: none;">
+        <div class="auth-modal-content">
+            <span class="auth-modal-close" onclick="closeLoginModal()">&times;</span>
+            <h2><i class="fas fa-sign-in-alt"></i> Login</h2>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" name="email" required placeholder="seu@email.com" data-testid="input-login-email">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Senha</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="login-password" name="password" required placeholder="Sua senha" data-testid="input-login-password">
+                        <button type="button" class="toggle-password" onclick="togglePassword('login-password', this)" data-testid="button-toggle-login-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="login-error" class="auth-error" style="display: none;"></div>
+                <button type="submit" class="auth-submit-btn" data-testid="button-login-submit">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+            </form>
+            <p class="auth-switch">Não tem conta? <a href="#" onclick="switchToRegister()">Registre-se</a></p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="auth-modal" style="display: none;">
+        <div class="auth-modal-content">
+            <span class="auth-modal-close" onclick="closeRegisterModal()">&times;</span>
+            <h2><i class="fas fa-user-plus"></i> Registrar</h2>
+            <form id="register-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="register-name">Nome</label>
+                    <input type="text" id="register-name" name="name" required placeholder="Seu nome completo" data-testid="input-register-name">
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" name="email" required placeholder="seu@email.com" data-testid="input-register-email">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Senha</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="register-password" name="password" required placeholder="Crie uma senha" minlength="6" data-testid="input-register-password">
+                        <button type="button" class="toggle-password" onclick="togglePassword('register-password', this)" data-testid="button-toggle-register-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm-password">Confirmar Senha</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="register-confirm-password" name="confirmPassword" required placeholder="Confirme sua senha" data-testid="input-register-confirm-password">
+                        <button type="button" class="toggle-password" onclick="togglePassword('register-confirm-password', this)" data-testid="button-toggle-confirm-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="register-error" class="auth-error" style="display: none;"></div>
+                <button type="submit" class="auth-submit-btn" data-testid="button-register-submit">
+                    <i class="fas fa-user-plus"></i> Criar Conta
+                </button>
+            </form>
+            <p class="auth-switch">Já tem conta? <a href="#" onclick="switchToLogin()">Faça login</a></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
